@@ -93,7 +93,7 @@ export default function TimerPage() {
 	<p className="text-5xl font-bold">{formatTime(timeLeft)}</p>
 	<div className="flex justify-center gap-4 mt-4">
 	{isRunning ? (
-	    <Button onClick={pauseTimer} variant="destructive">
+	    <Button onClick={pauseTimer} variant="info">
 	    Pause
 	    </Button>
 	) : (
