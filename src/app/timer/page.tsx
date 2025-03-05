@@ -5,12 +5,20 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export default function TimerPage() {
-    const WORK_TIME = 25;
-    const BREAK_TIME = 5;
+    const WORK_TIME = 25 * 60;
+    const BREAK_TIME = 5 * 60;
 
     const [timeLeft, setTimeLeft] = useState(WORK_TIME);
     const [isRunning, setIsRunning] = useState(false);
     const [isWorkSession, setIsWorkSession] = useState(true);
+    const [workSessions, setWorkSessions] = useState<number>(0);
+
+    useEffect(() => {
+	if (typeof window !== "undefined") {
+	    const storedSessions = Number(localStorage.getItem("workSessions")) || 0;
+	    setWorkSessions(storedSessions);
+	}
+    }, []);
 
     useEffect(() => {
 	if (typeof window !== "undefined" && "Notification" in window) {
@@ -26,6 +34,9 @@ export default function TimerPage() {
 	    }, 1000);
 	} else if (timeLeft === 0) {
 	    sendNotification();
+	    if (isWorkSession) {
+		trackWorkSession();
+	    };
 	    switchSession();
 	}
 	return () => clearInterval(timer);
@@ -38,6 +49,12 @@ export default function TimerPage() {
 		icon: "/favicon.ico",
 	    });
 	}
+    };
+
+    const trackWorkSession = () => {
+	const updatedSessions = workSessions + 1;
+	setWorkSessions(updatedSessions);
+	localStorage.setItem("workSessions", updatedSessions.toString());
     };
 
     const switchSession = () => {
@@ -69,7 +86,7 @@ export default function TimerPage() {
 	<Card className="w-full max-w-md">
 	<CardHeader>
 	<CardTitle className="text-center">
-	    {isWorkSession ? "Work" : "Break"}
+	{isWorkSession ? "Work" : "Break"}
 	</CardTitle>
 	</CardHeader>
 	<CardContent className="text-center">
@@ -80,12 +97,15 @@ export default function TimerPage() {
 	    Pause
 	    </Button>
 	) : (
-	    <Button onClick={startTimer}>Start</Button>
+	<Button onClick={startTimer}>Start</Button>
 	)}
 	<Button onClick={resetTimer} variant="secondary">
 	Reset
 	</Button>
 	</div>
+	<p className="mt-4 text-gray-700">
+	Sessions: <span className="font-bold">{workSessions}</span>
+	</p>
 	</CardContent>
 	</Card>
 	</main>
